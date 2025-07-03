@@ -35,10 +35,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db_obj
 
     async def update(
-        self, db: AsyncSession, *, db_obj: User, obj_in: UserUpdate
+        self, db: AsyncSession, *, db_obj: User, obj_in: UserUpdate | Dict[str, Any]
     ) -> User:
         """更新用户，自动处理密码哈希"""
-        update_data = obj_in.model_dump(exclude_unset=True)
+        # 处理不同的输入类型
+        if isinstance(obj_in, dict):
+            update_data = obj_in.copy()
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
 
         # 如果更新密码，需要哈希处理
         if "password" in update_data:
@@ -54,7 +58,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user = await self.get_by_phone(db, phone=phone)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):
+        if not verify_password(password, str(user.hashed_password)):
             return None
         return user
 
@@ -64,7 +68,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     async def is_superuser(self, user: User) -> bool:
         """检查是否为超级用户"""
-        return user.is_superuser
+        return bool(user.is_superuser)
 
 
 # 创建 CRUD 实例

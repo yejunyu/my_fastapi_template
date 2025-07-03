@@ -8,7 +8,7 @@ from app.api import deps
 from app.core.security import create_access_token
 from sqlalchemy.ext.asyncio import AsyncSession
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["用户相关"])
 
 
 @router.post("/register", response_model=schemas.UserPublic)

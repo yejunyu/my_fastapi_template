@@ -1,27 +1,32 @@
-# app/main.py
-from fastapi import FastAPI
-from app.core.config import settings
+from fastapi import FastAPI, status, HTTPException
+from pydantic import BaseModel
+from loguru import logger
+
+from app.core.response import UnifiedResponseRoute
+from app.core.exceptions import setup_exception_handlers
+from app.core.middleware import setup_middlewares
 from app.api.v1.api import api_router
 
-# 创建 FastAPI 应用实例
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.PROJECT_VERSION,
-    description="ai面试助手",
-    # 在生产环境中可以禁用 OpenAPI (Swagger UI) 和 ReDoc
-    # openapi_url="/api/v1/openapi.json",
-    # docs_url=None,
-    # redoc_url=None
+# 配置 loguru 日志
+import sys
+
+logger.remove()  # 移除默认处理器
+logger.add(
+    sink=sys.stdout,  # 输出到控制台
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    level="INFO",
 )
 
-# 在这里，我们稍后会添加生命周期事件和路由
+# --- FastAPI App 初始化 ---
+app = FastAPI(title="My FastAPI Template", version="1.0.0")
 
+# 应用统一响应封装
+app.router.route_class = UnifiedResponseRoute
 
-@app.get("/", tags=["Root"])
-async def read_root():
-    """
-    一个简单的根路径，用于健康检查或欢迎信息。
-    """
-    return {"message": f"Welcome to {settings.PROJECT_NAME}!"}
+# 注册异常处理器
+setup_exception_handlers(app)
 
-app.include_router(api_router, prefix="/api/v1") # <--- 添加
+# 注册中间件
+setup_middlewares(app)
+
+app.include_router(api_router, prefix="/api/v1")

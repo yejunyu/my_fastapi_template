@@ -11,11 +11,11 @@ class Settings(BaseSettings):
     # PostgreSQL 数据库配置
     # 使用 pydantic-settings，它会自动从环境变量中读取
     # 格式: postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DB_NAME
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_SERVER: str
+    POSTGRES_USER: str = "root"
+    POSTGRES_PASSWORD: str = "123456"
+    POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str
+    POSTGRES_DB: str = "fastapi"
 
     # 构造数据库 URL
     @property
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
 
     # JWT 配置
-    SECRET_KEY: str  # 用于签名 JWT 的密钥，必须保密
+    SECRET_KEY: str = ""  # 用于签名 JWT 的密钥，必须保密
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # Token 有效期: 8 天
 

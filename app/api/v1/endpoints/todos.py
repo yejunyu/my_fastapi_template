@@ -1,12 +1,12 @@
 # app/api/v1/endpoints/todos.py
-from typing import List, Any, Optional
+from typing import List, Any, cast
 from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app import crud, models, schemas
 from app.api import deps
 
-router = APIRouter()
+router = APIRouter(prefix="/todos", tags=["待办事项"])
 
 
 @router.post("/", response_model=schemas.TodoPublic)
@@ -20,7 +20,7 @@ async def create_new_todo(
     创建新的待办事项。
     """
     todo = await crud.todo.create_with_owner(
-        db_session, obj_in=todo_in, owner_id=current_user.id
+        db_session, obj_in=todo_in, owner_id=cast(int, current_user.id)
     )
     return todo
 
@@ -37,7 +37,7 @@ async def read_user_todos(
     获取当前用户的所有待办事项。
     """
     todos = await crud.todo.get_by_owner(
-        db_session, owner_id=current_user.id, skip=skip, limit=limit
+        db_session, owner_id=cast(int, current_user.id), skip=skip, limit=limit
     )
     return todos
 
@@ -54,7 +54,7 @@ async def update_user_todo(
     更新一个待办事项。
     """
     db_todo = await crud.todo.get_by_owner_and_id(
-        db_session, id=id, owner_id=current_user.id
+        db_session, id=id, owner_id=cast(int, current_user.id)
     )
     if not db_todo:
         raise HTTPException(status_code=404, detail="Todo not found")
@@ -74,7 +74,7 @@ async def delete_user_todo(
     删除一个待办事项。
     """
     db_todo = await crud.todo.get_by_owner_and_id(
-        db_session, id=id, owner_id=current_user.id
+        db_session, id=id, owner_id=cast(int, current_user.id)
     )
     if not db_todo:
         raise HTTPException(status_code=404, detail="Todo not found")
