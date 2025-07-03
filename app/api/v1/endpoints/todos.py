@@ -1,5 +1,5 @@
 # app/api/v1/endpoints/todos.py
-from typing import List, Any, cast
+from typing import List, cast
 from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +15,7 @@ async def create_new_todo(
     db_session: AsyncSession = Depends(deps.get_db),
     todo_in: schemas.TodoCreate,
     current_user: models.User = Depends(deps.get_current_user),
-) -> Any:
+) -> models.Todo:
     """
     创建新的待办事项。
     """
@@ -32,7 +32,7 @@ async def read_user_todos(
     skip: int = 0,
     limit: int = 100,
     current_user: models.User = Depends(deps.get_current_user),
-) -> Any:
+) -> List[models.Todo]:
     """
     获取当前用户的所有待办事项。
     """
@@ -49,7 +49,7 @@ async def update_user_todo(
     id: int,
     todo_in: schemas.TodoUpdate,
     current_user: models.User = Depends(deps.get_current_user),
-) -> Any:
+) -> models.Todo:
     """
     更新一个待办事项。
     """
@@ -69,7 +69,7 @@ async def delete_user_todo(
     db_session: AsyncSession = Depends(deps.get_db),
     id: int,
     current_user: models.User = Depends(deps.get_current_user),
-) -> Any:
+) -> schemas.Msg:
     """
     删除一个待办事项。
     """
@@ -80,4 +80,4 @@ async def delete_user_todo(
         raise HTTPException(status_code=404, detail="Todo not found")
 
     await crud.todo.remove(db_session, id=id)
-    return {"msg": "Todo deleted successfully"}
+    return schemas.Msg(msg="Todo deleted successfully")

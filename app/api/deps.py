@@ -12,7 +12,7 @@ from app.db.session import AsyncSessionFactory
 
 # 创建一个 OAuth2PasswordBearer 实例
 # tokenUrl 指向我们获取 token 的接口路径
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"/api/v1/login/access-token")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"/api/v1/users/login")
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -29,7 +29,7 @@ async def get_current_user(
     """
     依赖项：获取当前用户。
     - 验证 JWT token
-    - 从 token 中解析出用户手机号
+    - 从 token 中解析出用户邮箱
     - 从数据库中获取用户
     """
     try:
@@ -37,7 +37,7 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
-        # 从 payload 中获取手机号
+        # 从 payload 中获取邮箱
         token_data = schemas.TokenPayload(**payload)
     except (JWTError, ValueError):
         # 如果解码失败或 token 无效，抛出异常
@@ -52,8 +52,8 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid token: missing subject",
         )
-    # 使用 token 中的手机号从数据库中查找用户
-    user = await crud.user.get_by_phone(db_session, phone=token_data.sub)
+    # 使用 token 中的邮箱从数据库中查找用户
+    user = await crud.user.get_by_email(db_session, email=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -65,7 +65,7 @@ async def get_current_superuser(
     """
     依赖项：获取当前用户，并检查是否为超级用户。
     """
-    if not current_user.is_superuser:
+    if not bool(current_user.is_superuser):
         raise HTTPException(
             status_code=403, detail="The user doesn't have enough privileges"
         )

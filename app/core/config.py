@@ -34,6 +34,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # Token 有效期: 8 天
 
+    # 前端配置
+    FRONTEND_URL: str = "http://localhost:3000"
+
+    # 邮件配置
+    SMTP_SERVER: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+
     class Config:
         # 指定 .env 文件的路径
         env_file = ".env"

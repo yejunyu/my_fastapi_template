@@ -1,6 +1,6 @@
 # app/core/security.py
 from datetime import datetime, timedelta, timezone
-from typing import Any
+
 
 from jose import jwt
 from passlib.context import CryptContext
@@ -14,7 +14,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = settings.ALGORITHM
 
-def create_access_token(subject: str | Any, expires_delta: timedelta | None = None) -> str:
+
+def create_access_token(subject: str, expires_delta: timedelta | None = None) -> str:
     """
     创建 JWT access token.
 
@@ -29,10 +30,10 @@ def create_access_token(subject: str | Any, expires_delta: timedelta | None = No
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
-    
+
     # 构建要编码到 token 中的数据
     to_encode = {"exp": expire, "sub": str(subject)}
-    
+
     # 使用密钥和算法对数据进行编码
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

@@ -19,7 +19,7 @@ class EmailVerificationCode(BaseModel):
 
     def is_valid(self) -> bool:
         """检查验证码是否有效（未使用且未过期）"""
-        return not self.used and datetime.utcnow() < self.expires_at
+        return not self.used and datetime.utcnow() < self.expires_at  # type: ignore
 
     def mark_as_used(self):
         """标记验证码为已使用"""

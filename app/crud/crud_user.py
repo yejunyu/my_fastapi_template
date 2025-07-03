@@ -1,6 +1,6 @@
 # app/crud/crud_user.py
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,9 +11,9 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    async def get_by_phone(self, db: AsyncSession, *, phone: str) -> Optional[User]:
-        """通过手机号获取用户"""
-        statement = select(User).where(User.phone == phone)
+    async def get_by_email(self, db: AsyncSession, *, email: str) -> Optional[User]:
+        """通过邮箱获取用户"""
+        statement = select(User).where(User.email == email)
         result = await db.execute(statement)
         return result.scalars().first()
 
@@ -35,7 +35,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db_obj
 
     async def update(
-        self, db: AsyncSession, *, db_obj: User, obj_in: UserUpdate | Dict[str, Any]
+        self,
+        db: AsyncSession,
+        *,
+        db_obj: User,
+        obj_in: UserUpdate | Dict[str, Any],
     ) -> User:
         """更新用户，自动处理密码哈希"""
         # 处理不同的输入类型
@@ -52,10 +56,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return await super().update(db, db_obj=db_obj, obj_in=update_data)
 
     async def authenticate(
-        self, db: AsyncSession, *, phone: str, password: str
+        self, db: AsyncSession, *, email: str, password: str
     ) -> Optional[User]:
         """验证用户登录"""
-        user = await self.get_by_phone(db, phone=phone)
+        user = await self.get_by_email(db, email=email)
         if not user:
             return None
         if not verify_password(password, str(user.hashed_password)):
