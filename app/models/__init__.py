@@ -8,7 +8,8 @@ from app.models.base import Base
 # 导入所有你希望 Alembic 管理的模型
 from app.models.user import User
 from app.models.todo import Todo
+from app.models.email_verification import EmailVerification
 from app.models.base import BaseModel
 
 # 导出 Base 供 Alembic 使用
-__all__ = ["Base", "User", "Todo", "BaseModel"]
+__all__ = ["Base", "User", "Todo", "EmailVerification", "BaseModel"]

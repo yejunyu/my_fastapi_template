@@ -34,6 +34,20 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # Token 有效期: 8 天
 
+    # 邮件服务配置
+    SMTP_HOST: str = "smtp.exmail.qq.com"
+    SMTP_PORT: int = 465
+    SMTP_USERNAME: str = "agentme@yyhy.tech"
+    SMTP_PASSWORD: str = "ocSwzNu8CGGjQYjh"
+    FROM_EMAIL: str = "agentme@yyhy.tech"
+    FROM_NAME: str = "AI面试助手"
+
+    # 邮件验证配置
+    EMAIL_VERIFICATION_EXPIRE_HOURS: int = 2  # 邮件验证链接2小时过期
+
+    # 前端URL配置（用于邮件中的链接）
+    FRONTEND_URL: str = "http://localhost:3000"
+
     class Config:
         # 指定 .env 文件的路径
         env_file = ".env"

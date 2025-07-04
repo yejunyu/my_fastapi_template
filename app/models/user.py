@@ -9,10 +9,17 @@ class User(BaseModel):
     # 这有助于避免与 PostgreSQL 的保留关键字 "user" 冲突
     __tablename__ = "app_user"
 
-    phone = Column(String, index=True, unique=True, nullable=False)
+    # 邮箱字段（主要登录方式）
+    email = Column(String, index=True, unique=True, nullable=False)
+
+    # 手机号字段（可选，保留原有数据）
+    phone = Column(String, index=True, unique=True, nullable=True)
+
+    # 密码哈希
     hashed_password = Column(String, nullable=False)
+
+    # 用户状态
+    is_active = Column(Boolean, default=False, nullable=False)  # 默认未激活
     is_superuser = Column(Boolean, default=False, nullable=False)
 
-    # 建立与 Todo 模型的关系
-    # back_populates="owner" 指定了在 Todo 模型中，哪个属性反向关联回 User
-    todos = relationship("Todo", back_populates="owner")
+    # 移除了与邮件验证的关系定义，不使用显式外键

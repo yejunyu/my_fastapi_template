@@ -1,5 +1,6 @@
 from .crud_user import user
 from .crud_todo import todo
+from .crud_email_verification import email_verification
 
 # 为了向后兼容，保留一些函数式接口别名
 crud_user = user
