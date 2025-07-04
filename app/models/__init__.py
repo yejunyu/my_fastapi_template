@@ -9,7 +9,8 @@ from app.models.base import Base
 from app.models.user import User, UserStatus
 from app.models.todo import Todo
 from app.models.email_verification import EmailVerificationCode
-from app.models.password_reset import PasswordResetToken
+from app.models.password_reset import PasswordReset
+from app.models.user_file import UserFile
 from app.models.base import BaseModel
 
 # 导出 Base 供 Alembic 使用
@@ -19,6 +20,7 @@ __all__ = [
     "UserStatus",
     "Todo",
     "EmailVerificationCode",
-    "PasswordResetToken",
+    "PasswordReset",
     "BaseModel",
+    "UserFile",
 ]

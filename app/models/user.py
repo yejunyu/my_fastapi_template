@@ -1,5 +1,5 @@
 # app/models/user.py
-from sqlalchemy import Column, String, Boolean, Integer, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
 import enum
@@ -15,11 +15,9 @@ class User(BaseModel):
     # 这有助于避免与 PostgreSQL 的保留关键字 "user" 冲突
     __tablename__ = "app_user"
 
-    email = Column(String, index=True, unique=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    status = Column(Enum(UserStatus), default=UserStatus.ACTIVE, nullable=False)
-    is_superuser = Column(Boolean, default=False, nullable=False)
-
-    # 建立与 Todo 模型的关系
-    # back_populates="owner" 指定了在 Todo 模型中，哪个属性反向关联回 User
-    todos = relationship("Todo", back_populates="owner")
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False)
+    status = Column(String(20), default="active")

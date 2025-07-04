@@ -3,15 +3,15 @@ from typing import Optional
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.password_reset import PasswordResetToken
+from app.models.password_reset import PasswordReset
 
 
 class CRUDPasswordReset:
     async def create_token(
         self, db: AsyncSession, *, user_id: int, valid_minutes: int = 30
-    ) -> PasswordResetToken:
+    ) -> PasswordReset:
         """创建密码重置token"""
-        db_obj = PasswordResetToken.create_token(user_id, valid_minutes)
+        db_obj = PasswordReset.create_token(user_id, valid_minutes)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
@@ -19,13 +19,13 @@ class CRUDPasswordReset:
 
     async def get_valid_token(
         self, db: AsyncSession, *, token: str
-    ) -> Optional[PasswordResetToken]:
+    ) -> Optional[PasswordReset]:
         """获取有效的重置token"""
-        statement = select(PasswordResetToken).where(
+        statement = select(PasswordReset).where(
             and_(  # type: ignore
-                PasswordResetToken.token == token,
-                PasswordResetToken.used == False,
-                PasswordResetToken.expires_at > datetime.utcnow(),
+                PasswordReset.token == token,
+                PasswordReset.used == False,  # type: ignore
+                PasswordReset.expires_at > datetime.now(),
             )
         )
 
@@ -33,8 +33,8 @@ class CRUDPasswordReset:
         return result.scalars().first()
 
     async def mark_as_used(
-        self, db: AsyncSession, *, token_obj: PasswordResetToken
-    ) -> PasswordResetToken:
+        self, db: AsyncSession, *, token_obj: PasswordReset
+    ) -> PasswordReset:
         """标记token为已使用"""
         token_obj.mark_as_used()
         await db.commit()
@@ -45,8 +45,8 @@ class CRUDPasswordReset:
         """清理过期的token"""
         from sqlalchemy import delete
 
-        statement = delete(PasswordResetToken).where(
-            PasswordResetToken.expires_at <= datetime.utcnow()
+        statement = delete(PasswordReset).where(
+            PasswordReset.expires_at <= datetime.now()
         )
         result = await db.execute(statement)
         await db.commit()

@@ -43,7 +43,13 @@ class UnifiedResponseRoute(APIRoute):
                         data = None
             else:
                 # 纯数据，直接使用
-                data = response
+                if isinstance(response, (bytes, memoryview)):
+                    try:
+                        data = response.decode("utf-8")
+                    except Exception:
+                        data = None
+                else:
+                    data = response
 
             return JSONResponse(content={"code": 0, "msg": "success", "data": data})
 

@@ -1,4 +1,5 @@
 from .crud_user import user
+from .crud_user_file import user_file
 from .crud_todo import todo
 from .crud_email_verification import email_verification
 from .crud_password_reset import password_reset
@@ -6,6 +7,7 @@ from .crud_password_reset import password_reset
 # 为了向后兼容，保留一些函数式接口别名
 crud_user = user
 crud_todo = todo
+crud_user_file = user_file
 
 # 现在的使用方式：
 # from app.crud import user, todo

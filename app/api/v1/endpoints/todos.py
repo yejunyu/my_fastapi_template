@@ -1,12 +1,13 @@
 # app/api/v1/endpoints/todos.py
 from typing import List, cast
 from fastapi import APIRouter, Depends, HTTPException
+from app.core.response import UnifiedResponseRoute
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app import crud, models, schemas
 from app.api import deps
 
-router = APIRouter(prefix="/todos", tags=["待办事项"])
+router = APIRouter(prefix="/todos", tags=["待办事项"], route_class=UnifiedResponseRoute)
 
 
 @router.post("/", response_model=schemas.TodoPublic)

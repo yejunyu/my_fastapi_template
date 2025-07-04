@@ -1,7 +1,8 @@
 # app/api/v1/endpoints/login.py
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app import crud, schemas, models
 from app.api import deps
@@ -9,8 +10,9 @@ from app.core.security import create_access_token, get_password_hash
 from app.core.password_validator import validate_password_strength
 from app.services.email import email_service
 from app.services.auth import auth_service
+from app.core.response import UnifiedResponseRoute
 
-router = APIRouter(prefix="/users", tags=["用户认证"])
+router = APIRouter(prefix="/users", tags=["用户认证"], route_class=UnifiedResponseRoute)
 
 # 简单的内存缓存用于频率限制（生产环境应使用Redis）
 _rate_limit_cache: dict[str, datetime] = {}
@@ -116,17 +118,18 @@ async def register_new_user(
 async def login(
     *,
     db_session: AsyncSession = Depends(deps.get_db),
-    user_data: schemas.UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    login_type: str = Form(default="password"),
 ) -> schemas.Token:
     """
-    用户登录
+    用户登录（表单提交）
     """
     # 使用认证策略进行身份验证
     user = await auth_service.authenticate(
         db_session,
-        strategy="email_password",
-        email=user_data.email,
-        password=user_data.password,
+        strategy=login_type,
+        email=form_data.username,
+        password=form_data.password,
     )
 
     if not user:
@@ -137,14 +140,14 @@ async def login(
         )
 
     # 检查用户状态
-    if user.status != models.UserStatus.ACTIVE:  # type: ignore
+    if str(user.status) != models.UserStatus.ACTIVE.name:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="账户未激活，请联系管理员"
         )
 
     # 生成访问令牌
-    access_token = create_access_token(subject=user.email)
-    return schemas.Token(access_token=access_token)
+    access_token = create_access_token(subject=user.id)
+    return schemas.Token(uid=str(user.id), access_token=access_token)
 
 
 @router.post("/forgot-password")

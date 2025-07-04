@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.base import CRUDBase
 from app.core.security import get_password_hash, verify_password
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, filter_model_fields
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -28,7 +28,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         now = datetime.now()
         create_data.update({"created_at": now, "updated_at": now})
 
-        db_obj = User(**create_data)
+        # 只保留User模型中存在的字段
+        filtered_data = filter_model_fields(User, create_data)
+        db_obj = User(**filtered_data)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)

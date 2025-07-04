@@ -38,7 +38,7 @@ class EmailPasswordAuth(AuthenticationStrategy):
             return None
 
         # 检查用户状态是否为激活
-        if user.status != models.UserStatus.ACTIVE:
+        if str(user.status) != models.UserStatus.ACTIVE.name:
             return None
 
         return user
@@ -55,20 +55,50 @@ class PhoneCodeAuth(AuthenticationStrategy):
         raise NotImplementedError("手机验证码认证尚未实现")
 
 
+class EmailCodeAuth(AuthenticationStrategy):
+    """邮箱验证码认证策略"""
+
+    async def authenticate(
+        self, db: AsyncSession, **credentials
+    ) -> Optional[models.User]:
+        """通过邮箱和验证码认证用户"""
+        email = credentials.get("email")
+        code = credentials.get("password")  # 兼容form表单字段名
+        if not email or not code:
+            return None
+        from app.crud import email_verification, user
+
+        # 校验验证码有效性
+        code_obj = await email_verification.get_valid_code(db, email=email, code=code)
+        if not code_obj:
+            return None
+        # 标记验证码为已用
+        await email_verification.mark_as_used(db, code_obj=code_obj)
+        # 获取用户
+        user_obj = await user.get_by_email(db, email=email)
+        if not user_obj:
+            return None
+        # 检查用户状态
+        if str(user_obj.status) != models.UserStatus.ACTIVE:
+            return None
+        return user_obj
+
+
 class AuthService:
     """认证服务"""
 
     def __init__(self):
         self.strategies = {
-            "email_password": EmailPasswordAuth(),
+            "password": EmailPasswordAuth(),
             "phone_code": PhoneCodeAuth(),
+            "email_code": EmailCodeAuth(),
         }
 
     async def authenticate(
-        self, db: AsyncSession, strategy: str = "email_password", **credentials
+        self, db: AsyncSession, strategy: str = "password", **credentials
     ) -> Optional[models.User]:
         """使用指定策略认证用户"""
-        auth_strategy = self.strategies.get(strategy)
+        auth_strategy: AuthenticationStrategy | None = self.strategies.get(strategy)
         if not auth_strategy:
             raise ValueError(f"未知的认证策略: {strategy}")
 

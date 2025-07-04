@@ -27,8 +27,8 @@ class CRUDEmailVerification:
                 and_(  # type: ignore
                     EmailVerificationCode.email == email,
                     EmailVerificationCode.code == code,
-                    EmailVerificationCode.used == False,
-                    EmailVerificationCode.expires_at > datetime.utcnow(),
+                    EmailVerificationCode.used == False,  # type: ignore
+                    EmailVerificationCode.expires_at > datetime.now(),
                 )
             )
             .order_by(EmailVerificationCode.created_at.desc())

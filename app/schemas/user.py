@@ -48,3 +48,8 @@ class ForgotPassword(BaseModel):
 class ResetPassword(BaseModel):
     token: str
     new_password: str
+
+
+def filter_model_fields(model, data: dict):
+    db_fields = {c.name for c in model.__table__.columns}
+    return {k: v for k, v in data.items() if k in db_fields}

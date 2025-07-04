@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
+    ACCESS_KEY: str = ""
+    SECRET_KEY: str = ""
 
     class Config:
         # 指定 .env 文件的路径

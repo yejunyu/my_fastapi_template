@@ -1,5 +1,6 @@
 # app/core/security.py
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 
 from jose import jwt
@@ -15,7 +16,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = settings.ALGORITHM
 
 
-def create_access_token(subject: str, expires_delta: timedelta | None = None) -> str:
+def create_access_token(subject: Any, expires_delta: timedelta | None = None) -> str:
     """
     创建 JWT access token.
 

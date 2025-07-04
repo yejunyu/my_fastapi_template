@@ -53,7 +53,7 @@ async def get_current_user(
             detail="Invalid token: missing subject",
         )
     # 使用 token 中的邮箱从数据库中查找用户
-    user = await crud.user.get_by_email(db_session, email=token_data.sub)
+    user: models.User = await crud.user.get(db_session, id=int(token_data.sub))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
