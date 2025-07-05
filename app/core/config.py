@@ -9,8 +9,6 @@ class Settings(BaseSettings):
     PROJECT_VERSION: str = "1.0.0"
 
     # PostgreSQL 数据库配置
-    # 使用 pydantic-settings，它会自动从环境变量中读取
-    # 格式: postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DB_NAME
     POSTGRES_USER: str = "root"
     POSTGRES_PASSWORD: str = "123456"
     POSTGRES_SERVER: str = "localhost"
@@ -42,6 +40,8 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
+
+    # 阿里云配置
     ACCESS_KEY: str = ""
     SECRET_KEY: str = ""
 
