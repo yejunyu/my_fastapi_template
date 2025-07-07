@@ -3,6 +3,7 @@
 """
 
 from .prompt_loader import load_prompt, format_prompt, list_prompts, PromptLoader
+from .alipay_util import alipay_pay_client
 
 __all__ = ["load_prompt", "format_prompt", "list_prompts", "PromptLoader"]
 

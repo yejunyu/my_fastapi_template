@@ -141,7 +141,7 @@ async def login(
         )
 
     # 检查用户状态
-    if str(user.status) != models.UserStatus.ACTIVE.value:
+    if user.is_active is False:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="账户未激活，请联系管理员"
         )

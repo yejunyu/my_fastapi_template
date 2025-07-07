@@ -1,6 +1,25 @@
+from enum import StrEnum
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+
+from app.models.product import ProductEnum
+
+
+class ProductPlatform(StrEnum):
+    WEB = "WEB"
+    APP = "APP"
+
+
+class PaymentPlatform(StrEnum):
+    ALIPAY = "ALIPAY"
+    WECHAT = "WECHAT"
+
+
+class PaymentInput(BaseModel):
+    pay_type: PaymentPlatform
+    prop_id: ProductEnum
+    platform: ProductPlatform
 
 
 class ProductBase(BaseModel):
@@ -29,5 +48,4 @@ class ProductPublic(ProductBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}

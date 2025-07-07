@@ -8,6 +8,7 @@ dependencies = [
     "aiofiles>=24.1.0",
     "aiosmtplib>=4.0.1",
     "alembic>=1.16.2",
+    "alipay-sdk-python>=3.7.660",
     "asyncpg>=0.30.0",
     "fastapi[all]>=0.115.14",
     "fastuuid>=0.12.0",

@@ -1,5 +1,12 @@
+from enum import StrEnum
 from sqlalchemy import Column, Integer, String, Text
 from .base import BaseModel
+
+
+class ProductEnum(StrEnum):
+    SINGLE_001 = "SINGLE_001"
+    MONTHLY_001 = "MONTHLY_001"
+    LIFETIME_001 = "LIFETIME_001"
 
 
 class Product(BaseModel):

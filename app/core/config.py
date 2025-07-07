@@ -42,7 +42,12 @@ class Settings(BaseSettings):
     HUOSHAN_ACCESS_KEY: str = ""
     HUOSHAN_SECRET_KEY: str = ""
 
-    print(SQLALCHEMY_DATABASE_URI)
+    # 支付宝配置
+    ALIPAY_APP_ID: str = ""
+    ALIPAY_APP_PRIVATE_KEY: str = ""
+    ALIPAY_ALIPAY_PUBLIC_KEY: str = ""
+    ALIPAY_NOTIFY_URL: str = ""
+    ALIPAY_SERVER_URL: str = "https://openapi.alipay.com/gateway.do"
 
     class Config:
         # 指定 .env 文件的路径
