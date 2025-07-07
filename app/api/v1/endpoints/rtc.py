@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import models, schemas
 from app.api import deps
 from app.schemas import chat
+from app.services.zijie import sig
 from app.services.zijie.genToken import AccessToken
 
 router = APIRouter(prefix="/rtc", tags=["RTC"], route_class=UnifiedResponseRoute)
@@ -91,6 +92,7 @@ async def get_scene_config(
                     "ResourceId": "volc.service_type.10029",
                 },
             },
+            "SubtitleConfig": {"DisableRTSSubtitle": False, "SubtitleMode": 1},
             "LLMConfig": {
                 "Mode": "ArkV3",
                 "EndPointId": "ep-20250704135822-sbqhj",
@@ -115,18 +117,8 @@ async def start_voice_chat(
     """
     uid: str = str(current_user.id)
     config = json.loads(request.request)
-    url = "https://rtc.volcengineapi.com?Action=StartVoiceChat&Version=2024-12-01"
 
-    return {
-        "Result": "ok",
-        "ResponseMetadata": {
-            "RequestId": "20230****10420",
-            "Action": "StartVoiceChat",
-            "Version": "2024-12-01",
-            "Service": "rtc",
-            "Region": "cn-north-1",
-        },
-    }
+    return sig.start_voice_chat(config)
 
 
 @router.post("/stopVoiceChat", response_model=dict)
@@ -141,15 +133,9 @@ async def stop_voice_chat(
     """
     uid: str = str(current_user.id)
     task_id = request.request
-    url = "https://rtc.volcengineapi.com?Action=StartVoiceChat&Version=2024-12-01"
-
-    return {
-        "Result": "ok",
-        "ResponseMetadata": {
-            "RequestId": "Your_Re20230****10420questId",
-            "Action": "StopVoiceChat",
-            "Version": "2024-12-01",
-            "Service": "rtc",
-            "Region": "cn-north-1",
-        },
+    params = {
+        "AppId": APPID,
+        "RoomId": uid,
+        "TaskId": task_id,
     }
+    return sig.stop_voice_chat(params)

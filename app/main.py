@@ -1,11 +1,13 @@
 from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from loguru import logger
+from sqlalchemy import false
 
 from app.core.response import UnifiedResponseRoute
 from app.core.exceptions import setup_exception_handlers
 from app.core.middleware import setup_middlewares
 from app.api.v1.api import api_router
+from fastapi.middleware.cors import CORSMiddleware
 
 # 配置 loguru 日志
 import sys
@@ -28,6 +30,14 @@ setup_exception_handlers(app)
 
 # 注册中间件
 setup_middlewares(app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(api_router, prefix="/api/v1")
 

@@ -13,6 +13,7 @@ from app.services.auth import auth_service
 from app.core.response import UnifiedResponseRoute
 
 router = APIRouter(prefix="/users", tags=["用户认证"], route_class=UnifiedResponseRoute)
+# router = APIRouter(prefix="/users", tags=["用户认证"])
 
 # 简单的内存缓存用于频率限制（生产环境应使用Redis）
 _rate_limit_cache: dict[str, datetime] = {}
@@ -242,6 +243,7 @@ async def get_current_user_info(
     """
     获取当前用户信息
     """
+    print(f"当前用户: {current_user.status}, ID: {current_user.id}")
     return current_user
 
 

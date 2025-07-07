@@ -35,8 +35,8 @@ class UserUpdate(BaseModel):
 class UserPublic(BaseModel):
     id: int
     email: str
-    status: UserStatus
-    is_superuser: bool
+    status: str
+    is_superuser: bool = False
 
 
 # 用于忘记密码的模型

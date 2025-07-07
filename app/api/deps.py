@@ -1,7 +1,7 @@
 # app/api/deps.py
 from typing import AsyncGenerator
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials, HTTPBearer, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,7 +12,8 @@ from app.db.session import AsyncSessionFactory
 
 # 创建一个 OAuth2PasswordBearer 实例
 # tokenUrl 指向我们获取 token 的接口路径
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"/api/v1/users/login")
+# reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"/api/v1/users/login")
+reusable_oauth2 = HTTPBearer()
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -24,7 +25,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_current_user(
-    db_session: AsyncSession = Depends(get_db), token: str = Depends(reusable_oauth2)
+    db_session: AsyncSession = Depends(get_db), credentials: HTTPAuthorizationCredentials = Depends(reusable_oauth2)
 ) -> models.User:
     """
     依赖项：获取当前用户。
@@ -32,6 +33,7 @@ async def get_current_user(
     - 从 token 中解析出用户邮箱
     - 从数据库中获取用户
     """
+    token = credentials.credentials  # 获取 token 字符串
     try:
         # 解码 JWT，获取 payload
         payload = jwt.decode(
