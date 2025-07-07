@@ -36,7 +36,9 @@ def create_access_token(subject: Any, expires_delta: timedelta | None = None) ->
     to_encode = {"exp": expire, "sub": str(subject)}
 
     # 使用密钥和算法对数据进行编码
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.HUOSHAN_SECRET_KEY, algorithm=ALGORITHM
+    )
     return encoded_jwt
 
 

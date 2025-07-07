@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
-from datetime import datetime
-from .base import Base, BaseModel
+from sqlalchemy import Column, Integer, String, Text
+from .base import BaseModel
 
 
 class UserFile(BaseModel):
@@ -10,5 +9,6 @@ class UserFile(BaseModel):
     file_type = Column(String(20), nullable=False)
     text_content = Column(Text, nullable=True)
     user_id = Column(Integer, nullable=False)
-    job_intention = Column(String(255), nullable=True)
+    task_id = Column(String(255), nullable=False, default="123")
+    job_intention = Column(Text, nullable=True)
     resume_experience = Column(Text, nullable=True)

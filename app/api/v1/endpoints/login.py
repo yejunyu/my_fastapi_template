@@ -1,5 +1,5 @@
 # app/api/v1/endpoints/login.py
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordRequestForm
@@ -21,7 +21,7 @@ _rate_limit_cache: dict[str, datetime] = {}
 
 def check_rate_limit(key: str, seconds: int = 60) -> bool:
     """检查频率限制"""
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     if key in _rate_limit_cache:
         if now - _rate_limit_cache[key] < timedelta(seconds=seconds):
             return False
@@ -141,7 +141,7 @@ async def login(
         )
 
     # 检查用户状态
-    if str(user.status) != models.UserStatus.ACTIVE.name:
+    if str(user.status) != models.UserStatus.ACTIVE.value:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="账户未激活，请联系管理员"
         )

@@ -1,4 +1,5 @@
 # app/schemas/user.py
+from pickle import NONE
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 
@@ -36,6 +37,11 @@ class UserPublic(BaseModel):
     id: int
     email: str
     status: str
+    nickname: str | None = "大厂员工"
+    avatar: str | None = (
+        "https://i-blog.csdnimg.cn/blog_migrate/94c297fce340bdcd14fbd8751677c8ff.png"
+    )
+    points: int = 0
     is_superuser: bool = False
 
 
@@ -46,6 +52,7 @@ class ForgotPassword(BaseModel):
 
 # 用于重置密码的模型
 class ResetPassword(BaseModel):
+    email: EmailStr
     token: str
     new_password: str
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +25,7 @@ class CRUDPasswordReset:
             and_(  # type: ignore
                 PasswordReset.token == token,
                 PasswordReset.used == False,  # type: ignore
-                PasswordReset.expires_at > datetime.now(),
+                PasswordReset.expires_at > datetime.now(timezone.utc),
             )
         )
 
@@ -46,7 +46,7 @@ class CRUDPasswordReset:
         from sqlalchemy import delete
 
         statement = delete(PasswordReset).where(
-            PasswordReset.expires_at <= datetime.now()
+            PasswordReset.expires_at <= datetime.now(timezone.utc)
         )
         result = await db.execute(statement)
         await db.commit()

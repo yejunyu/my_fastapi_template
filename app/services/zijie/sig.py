@@ -18,8 +18,8 @@ Host = "rtc.volcengineapi.com"
 ContentType = "application/json"  # 使用JSON格式
 
 # 请求的凭证
-AK = os.getenv("ACCESS_KEY")
-SK = os.getenv("SECRET_KEY")
+AK = os.getenv("HUOSHAN_ACCESS_KEY")
+SK = os.getenv("HUOSHAN_SECRET_KEY")
 
 
 # 辅助函数: sha256 HMAC加密

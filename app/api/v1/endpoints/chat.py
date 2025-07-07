@@ -1,7 +1,7 @@
 import json
 import re
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, Form
 import os
 import pdfplumber
 import docx
@@ -12,11 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import models
 from app.api import deps
 from app.crud import user_file
+from app.models.interview import Interview
 from app.schemas.user_file import UserFileCreate, UserFilePublic
 from loguru import logger
 
 from openai import AsyncOpenAI
 from app.core.response import UnifiedResponseRoute
+from app.utils.prompt_loader import prompt_loader
 
 router = APIRouter(prefix="/chat", tags=["ai相关"], route_class=UnifiedResponseRoute)
 
@@ -27,9 +29,10 @@ client = AsyncOpenAI(
 )
 
 
-@router.post("/upload-file", response_model=UserFilePublic)
+@router.post("/upload-file", response_model=dict)
 async def upload_file(
     file: UploadFile = File(...),
+    task_id: str = Form(...),
     db_session: AsyncSession = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user),
 ):
@@ -92,19 +95,27 @@ async def upload_file(
     resume_experience = None
     try:
         completion = await client.chat.completions.create(
-            model="ep-20250704152034-hcjqt",
+            # model="ep-20250704152034-hcjqt",
+            model="ep-20250707161556-qfjs8",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
         )
 
         resp = completion.choices[0].message.content
         data = get_json(resp)
-        job_intention = data.get("job_intention")
+        job_intention = data.get("job_intention", "")
         resume_experience = data.get("resume_experience")
     except Exception as e:
         logger.error(f"简历信息抽取失败: {e}")
 
     # 更新数据库，写入抽取字段
+    data = {
+        "专业知识储备": 0.2,
+        "实践项目经验": 0.2,
+        "解决问题/学习能力": 0.4,
+        "沟通表达": 0.1,
+        "团队协作": 0.1,
+    }
     if job_intention or resume_experience:
         await user_file.update(
             db_session,
@@ -114,8 +125,31 @@ async def upload_file(
                 "resume_experience": resume_experience,
             },
         )
+        prompt = prompt_loader.format_prompt(
+            "score_weight", job_intention=job_intention
+        )
+        logger.info(f"prompt: {prompt}")
+        completion = await client.chat.completions.create(
+            model="ep-20250707161556-qfjs8",
+            messages=[{"role": "user", "content": prompt}],
+        )
 
-    return db_obj
+        resp = completion.choices[0].message.content
+        data = get_json(resp)
+        new_interview = Interview(
+            user_id=current_user.id,
+            task_id=task_id,
+            interview_result={"score_weight": data},
+        )
+        db_session.add(new_interview)
+        await db_session.commit()
+        await db_session.refresh(new_interview)
+    return {
+        "task_id": task_id,
+        "job_intention": job_intention,
+        "resume_experience": resume_experience,
+        "score_weight": data,
+    }
 
 
 def get_json(md_text):
@@ -128,3 +162,26 @@ def get_json(md_text):
         return data
     else:
         return {}
+
+
+@router.get("/interview_result")
+async def interview_result(
+    *,
+    db_session: AsyncSession = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    """
+    获得面试结果
+    """
+    pass
+
+
+@router.post("/chat_callback")
+async def chat_callback(
+    *, request: Request, db_session: AsyncSession = Depends(deps.get_db)
+):
+    """
+    语音面试回调
+    """
+    logger.info(f"chat_callback: {request}")
+    return {}

@@ -1,5 +1,5 @@
 # app/crud/crud_user.py
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, Union
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +25,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         create_data["is_superuser"] = False  # 默认不是超级用户
 
         # 添加时间戳
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         create_data.update({"created_at": now, "updated_at": now})
 
         # 只保留User模型中存在的字段

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,7 +28,7 @@ class CRUDEmailVerification:
                     EmailVerificationCode.email == email,
                     EmailVerificationCode.code == code,
                     EmailVerificationCode.used == False,  # type: ignore
-                    EmailVerificationCode.expires_at > datetime.now(),
+                    EmailVerificationCode.expires_at > datetime.now(timezone.utc),
                 )
             )
             .order_by(EmailVerificationCode.created_at.desc())

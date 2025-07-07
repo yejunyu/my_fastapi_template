@@ -1,7 +1,12 @@
 # app/api/deps.py
 from typing import AsyncGenerator
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBasicCredentials, HTTPBearer, OAuth2PasswordBearer
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBasicCredentials,
+    HTTPBearer,
+    OAuth2PasswordBearer,
+)
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,7 +30,8 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_current_user(
-    db_session: AsyncSession = Depends(get_db), credentials: HTTPAuthorizationCredentials = Depends(reusable_oauth2)
+    db_session: AsyncSession = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(reusable_oauth2),
 ) -> models.User:
     """
     依赖项：获取当前用户。
@@ -37,7 +43,7 @@ async def get_current_user(
     try:
         # 解码 JWT，获取 payload
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.HUOSHAN_SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         # 从 payload 中获取邮箱
         token_data = schemas.TokenPayload(**payload)

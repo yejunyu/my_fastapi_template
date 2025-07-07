@@ -14,4 +14,5 @@ class InterviewInfoUpdate(BaseModel):
 
 
 class VoiceChatIn(BaseModel):
-    request: str
+    request: str | None = None
+    task_id: str

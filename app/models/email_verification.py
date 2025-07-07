@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from app.models.base import BaseModel
 
@@ -14,7 +14,7 @@ class EmailVerificationCode(BaseModel):
     @classmethod
     def create_code(cls, email: str, code: str, valid_minutes: int = 10):
         """创建验证码记录"""
-        expires_at = datetime.now() + timedelta(minutes=valid_minutes)
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=valid_minutes)
         return cls(email=email, code=code, expires_at=expires_at, used=False)
 
     def is_valid(self) -> bool:

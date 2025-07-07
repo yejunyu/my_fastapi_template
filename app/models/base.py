@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import timezone
 from sqlalchemy import Column, Integer, DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -15,10 +16,13 @@ class BaseModel(Base):
 
     id = Column(Integer, primary_key=True, index=True, comment="主键ID")
     created_at = Column(
-        DateTime, nullable=False, server_default=func.now(), comment="创建时间"
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        comment="创建时间",
     )
     updated_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),

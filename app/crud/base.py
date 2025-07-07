@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
@@ -43,7 +43,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """创建新记录"""
         obj_in_data = jsonable_encoder(obj_in)
         # 添加时间戳
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         obj_in_data.update({"created_at": now, "updated_at": now})
 
         db_obj = self.model(**obj_in_data)  # type: ignore
@@ -67,7 +67,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             update_data = obj_in.model_dump(exclude_unset=True)
 
         # 添加更新时间戳
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now(timezone.utc)
 
         for field in obj_data:
             if field in update_data:

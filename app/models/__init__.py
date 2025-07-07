@@ -12,6 +12,8 @@ from app.models.email_verification import EmailVerificationCode
 from app.models.password_reset import PasswordReset
 from app.models.user_file import UserFile
 from app.models.base import BaseModel
+from app.models.interview import Interview
+from app.models.product import Product
 
 # 导出 Base 供 Alembic 使用
 __all__ = [
@@ -23,4 +25,6 @@ __all__ = [
     "PasswordReset",
     "BaseModel",
     "UserFile",
+    "Interview",
+    "Product",
 ]

@@ -32,9 +32,6 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # Token 有效期: 8 天
 
-    # 前端配置
-    FRONTEND_URL: str = "http://localhost:3000"
-
     # 邮件配置
     SMTP_SERVER: str = ""
     SMTP_PORT: int = 587
@@ -42,8 +39,10 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
 
     # 阿里云配置
-    ACCESS_KEY: str = ""
-    SECRET_KEY: str = ""
+    HUOSHAN_ACCESS_KEY: str = ""
+    HUOSHAN_SECRET_KEY: str = ""
+
+    print(SQLALCHEMY_DATABASE_URI)
 
     class Config:
         # 指定 .env 文件的路径

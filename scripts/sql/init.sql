@@ -1,18 +1,5 @@
-CREATE DATABASE interview;CREATE TABLE IF NOT EXISTS app_user (
-    id BIGINT PRIMARY KEY,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    hashed_password VARCHAR(255) NOT NULL,
-    is_superuser BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-INSERT INTO app_user (id, phone, hashed_password, is_superuser, created_at, updated_at)
-VALUES (
-    100000,
-    '12345678901',
-    'test_hashed_password',
-    FALSE,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-);
+-- 商品初始化数据
+INSERT INTO product (sku_id, name, price, duration_seconds, description, status, created_at, updated_at) VALUES
+  ('SINGLE_001', '单场面试', 990, 2700, '基础流程（出题、评分、简评），极简报告（分数+3条建议），无附加服务，记录仅存7天。', 1, NOW(), NOW()),
+  ('MONTHLY_001', '月度会员', 19900, 27000, '完整功能（简历抽取、岗位定制题、多维度评分、反馈拆解），标准版报告（分数、分项分析、10条建议），每月限10场，赠1次简历优化，专属客服12小时响应。', 1, NOW(), NOW()),
+  ('LIFETIME_001', '终身会员', 79900, 237600, '全功能（自定义模板、深度岗位匹配、多轮归因、行业对标），深度报告（分数、行业对比、20条建议、成长轨迹），不限场次，每月1次人工顾问1v1，优先体验新功能，老带新各返现50元。', 1, NOW(), NOW());

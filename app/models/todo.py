@@ -1,11 +1,10 @@
 # app/models/todo.py
 from sqlalchemy import Column, Integer, String, Boolean
-from .base import Base
+from .base import Base, BaseModel
 
 
-class Todo(Base):
+class Todo(BaseModel):
     __tablename__ = "todo"
-    id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     description = Column(String(255), nullable=True)
     completed = Column(Boolean, default=False)

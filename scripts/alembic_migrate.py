@@ -8,7 +8,6 @@ def main():
         logger.error("用法: python scripts/alembic_migrate.py <迁移描述>")
         sys.exit(1)
     msg = sys.argv[1]
-
     # 1. 生成迁移文件
     subprocess.run(["alembic", "revision", "--autogenerate", "-m", msg], check=True)
 

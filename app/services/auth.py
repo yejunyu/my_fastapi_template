@@ -38,8 +38,8 @@ class EmailPasswordAuth(AuthenticationStrategy):
             return None
 
         # 检查用户状态是否为激活
-        if str(user.status) != models.UserStatus.ACTIVE.name:
-            return None
+        # if str(user.status) != models.UserStatus.ACTIVE.value:
+        # return None
 
         return user
 
@@ -79,7 +79,7 @@ class EmailCodeAuth(AuthenticationStrategy):
         if not user_obj:
             return None
         # 检查用户状态
-        if str(user_obj.status) != models.UserStatus.ACTIVE:
+        if user_obj.is_active is False:
             return None
         return user_obj
 

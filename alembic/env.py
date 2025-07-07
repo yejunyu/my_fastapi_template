@@ -8,6 +8,7 @@ from alembic import context
 
 from app.core.config import settings
 from app.models import Base
+from loguru import logger
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,7 +21,7 @@ if config.config_file_name is not None:
 
 # 设置数据库 URL
 config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
-
+logger.info(settings.SQLALCHEMY_DATABASE_URI)
 # add your model's MetaData object here
 # for 'autogenerate' support
 target_metadata = Base.metadata

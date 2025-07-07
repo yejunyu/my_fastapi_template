@@ -45,19 +45,17 @@ class EmailService:
 
     async def send_password_reset_link(self, email: str, reset_token: str) -> bool:
         """发送密码重置链接"""
-        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
         subject = "密码重置请求 - 重要通知"
         body = f"""
         <html>
         <body>
             <p>尊敬的用户，</p>
             <p>我们收到一个请求，要求重置与此邮箱关联的账户密码。</p>
-            <p>请点击以下链接重置您的密码：</p>
-            <p><a href="{reset_url}">点击此处重置密码</a></p>
-            <p>此链接有效期为<strong>30分钟</strong>，请尽快使用。</p>
-            <p><strong>请注意：</strong>如果您没有请求重置密码，请忽略此邮件，您的密码将保持不变。请勿将此链接分享给任何人。</p>
+            <p>您的邮箱验证码是：<strong>{reset_token}</strong></p>
+            <p>此验证码有效期为<strong>10分钟</strong>，请及时使用。请勿将此验证码分享给任何人。</p>
+            <p>如果这不是您本人的操作，请立即忽略此邮件并联系客服。</p>
             <br>
-            <p>感谢您的理解与支持！</p>
+            <p>祝您使用愉快！</p>
             <p>此致，</p>
             <p>您的应用团队</p>
         </body>

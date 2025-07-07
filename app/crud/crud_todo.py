@@ -1,5 +1,5 @@
 # app/crud/crud_todo.py
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -18,7 +18,7 @@ class CRUDTodo(CRUDBase[Todo, TodoCreate, TodoUpdate]):
         create_data["owner_id"] = owner_id
 
         # 添加时间戳
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         create_data.update({"created_at": now, "updated_at": now})
 
         db_obj = Todo(**create_data)

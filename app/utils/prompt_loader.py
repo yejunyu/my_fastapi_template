@@ -72,7 +72,7 @@ class PromptLoader:
 
         return sorted(prompts)
 
-    def format_prompt(self, filename: str, **kwargs) -> Optional[str]:
+    def format_prompt(self, filename: str, **kwargs) -> str:
         """
         加载并格式化prompt内容（使用Jinja2模板）
 
@@ -85,7 +85,7 @@ class PromptLoader:
         """
         content = self.load_prompt(filename)
         if content is None:
-            return None
+            return ""
 
         try:
             # 使用Jinja2模板引擎
