@@ -14,6 +14,7 @@ from app.models.user_file import UserFile
 from app.models.base import BaseModel
 from app.models.interview import Interview, Order
 from app.models.product import Product
+from app.models.chat_log import ChatLog
 
 # 导出 Base 供 Alembic 使用
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "Interview",
     "Order",
     "Product",
+    "ChatLog",
 ]

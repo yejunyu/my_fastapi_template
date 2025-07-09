@@ -6,6 +6,7 @@ import time
 from hashlib import sha256
 from collections import OrderedDict
 
+
 VERSION = "001"
 VERSION_LENGTH = 3
 

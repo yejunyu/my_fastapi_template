@@ -3,10 +3,11 @@ from datetime import datetime, timezone
 import json
 import os
 import pathlib
+import time
 import aiofiles
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from app.core.response import UnifiedResponseRoute
-from app.core.exceptions import BusinessException, BusinessErrorCode
+from app.core.exceptions import BusinessException
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,9 +15,13 @@ from app import models, schemas
 from app.api import deps
 from app.schemas import chat
 from app.services.zijie import sig
-from app.services.zijie.genToken import AccessToken
+from app.services.zijie.genToken import (
+    AccessToken,
+    PrivPublishStream,
+    PrivSubscribeStream,
+)
 from app.models.interview import Interview, InterviewStatus
-from app.utils.prompt_loader import prompt_loader
+from app.crud import crud_interview
 
 router = APIRouter(prefix="/rtc", tags=["RTC"], route_class=UnifiedResponseRoute)
 
@@ -38,6 +43,8 @@ async def get_token(
     """
     uid: str = str(current_user.id)
     token = AccessToken(uid, APPID, KEY)
+    token.add_privilege(PrivPublishStream, int(time.time()) + 86400)
+    token.add_privilege(PrivSubscribeStream, 0)
     return schemas.Token(uid=uid, access_token=token.serialize())
 
 
@@ -90,7 +97,7 @@ async def get_scene_config(
                 "ProviderParams": {
                     "app": {"appid": TTS_APPID, "token": TTS_KEY},
                     "audio": {
-                        "voice_type": "zh_male_aojiaobazong_moon_bigtts",
+                        "voice_type": "zh_female_kefunvsheng_mars_bigtts",
                         "speech_rate": 0,
                         "pitch_rate": 0,
                     },
@@ -120,7 +127,7 @@ async def start_voice_chat(
     *,
     request: chat.VoiceChatIn,
     db_session: AsyncSession = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_user),
+    current_user: models.User = Depends(deps.require_points(60 * 45)),
 ) -> dict:
     """
     开始语音面试
@@ -178,11 +185,5 @@ async def stop_voice_chat(
     result = await db_session.execute(query)
     interview = result.scalar_one_or_none()
     if interview:
-        interview.end_time = datetime.now(timezone.utc)  # type: ignore
-        duration: int = (interview.end_time - interview.created_at).total_seconds()  # type: ignore
-        interview.duration = duration  # type: ignore
-        interview.status = InterviewStatus.INTERVIEW_COMPLETED.value  # type: ignore
-        db_session.add(interview)
-        await db_session.commit()
-        await db_session.refresh(interview)
+        await crud_interview.end_interview(db_session, interview)
     return resp

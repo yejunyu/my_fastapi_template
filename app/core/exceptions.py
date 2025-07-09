@@ -33,7 +33,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
     async def business_exception_handler(request: Request, exc: BusinessException):
         """处理我们主动抛出的 BusinessException"""
         return JSONResponse(
-            status_code=exc.code,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={"code": exc.code, "msg": exc.msg, "data": None},
         )
 
@@ -51,8 +51,13 @@ class BusinessErrorCode(Enum):
     SYSTEM_ERROR = (9999, "system error")
     # 用户相关
     USER_ERROR = (1001, "interview already exists")
+    POINTS_NOT_ENOUGH = (1002, "points not enough")
+    # 面试相关
+    INTERVIEW_NOT_FOUND = (2001, "interview not found")
+    INTERVIEW_NOT_COMPLETED = (2002, "interview not completed")
+    INTERVIEW_DURATION_TOO_SHORT = (2003, "interview duration too short")
     # 聊天相关
-    CHAT_ERROR = (2002, "chat error")
+    CHAT_ERROR = (2004, "chat error")
     # 订单相关
     ORDER_ERROR = (3003, "order error")
     # 可扩展更多业务错误码
@@ -78,7 +83,8 @@ class BusinessException(Exception):
     ):
         self.code = error_enum.code
         self.msg = msg or error_enum.msg
-        super().__init__(self.msg)
+        # 让父类接收code和msg，便于异常链和日志追踪
+        super().__init__(self.code, self.msg)
 
     def __str__(self):
         return f"BusinessException(code={self.code}, msg={self.msg})"

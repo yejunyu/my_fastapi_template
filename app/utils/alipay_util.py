@@ -3,8 +3,9 @@ from alipay.aop.api.AlipayClientConfig import AlipayClientConfig
 from alipay.aop.api.DefaultAlipayClient import DefaultAlipayClient
 from alipay.aop.api.domain.AlipayTradeAppPayModel import AlipayTradeAppPayModel
 from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel
-from alipay.aop.api.request.AlipayTradeAppPayRequest import AlipayTradeAppPayRequest
+from alipay.aop.api.domain.AlipayTradeWapPayModel import AlipayTradeWapPayModel
 from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
+from alipay.aop.api.request.AlipayTradeWapPayRequest import AlipayTradeWapPayRequest
 from app.core.config import settings
 from app.models.interview import Order
 from app.models.product import Product
@@ -38,7 +39,6 @@ class AlipayUtil:
         if platform == "web":
             model = AlipayTradePagePayModel()
             model.out_trade_no = order.order_no
-            # model.ext_user_info = str(order.user_id)
             model.total_amount = str(order.amount / 100)  # 单位元
             model.subject = product.name
             model.body = product.description or product.name
@@ -48,20 +48,19 @@ class AlipayUtil:
             request.notify_url = self.notify_url
             # 返回支付链接（GET方式）
             pay_url = self.client.page_execute(request, http_method="GET")
-            return {"qr_url": pay_url}
+            return {"url_str": pay_url}
         elif platform == "app":
-            model = AlipayTradeAppPayModel()
+            model = AlipayTradeWapPayModel()
             model.out_trade_no = order.order_no
-            # model.ext_user_info = str(order.user_id)
             model.total_amount = str(order.amount / 100)
             model.subject = product.name
             model.body = product.description or product.name
-            model.product_code = "QUICK_MSECURITY_PAY"
-            request = AlipayTradeAppPayRequest(biz_model=model)
+            model.product_code = "QUICK_WAP_WAY"
+            request = AlipayTradeWapPayRequest(biz_model=model)
             request.notify_url = self.notify_url
             # 返回app拉起支付串
-            pay_str = self.client.sdk_execute(request)
-            return {"app_pay_str": pay_str}
+            pay_str = self.client.page_execute(request, http_method="GET")
+            return {"url_str": pay_str}
         else:
             raise ValueError(f"不支持的平台类型: {platform}")
 

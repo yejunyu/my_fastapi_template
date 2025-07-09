@@ -16,7 +16,7 @@ Version = "2024-12-01"
 Region = "cn-beijing"
 Host = "rtc.volcengineapi.com"
 ContentType = "application/json"  # 使用JSON格式
-
+APPID = "686514454b4c3e017a63f89c"
 # 请求的凭证
 AK = os.getenv("HUOSHAN_ACCESS_KEY")
 SK = os.getenv("HUOSHAN_SECRET_KEY")
@@ -126,13 +126,28 @@ def start_voice_chat(body: dict):
 
 
 def stop_voice_chat(body: dict):
-    body = {
-        "AppId": "686514454b4c3e017a63f89c",
-        "RoomId": "100000",
-        "TaskId": "string",
-    }
+    # 如果body没有AppId，则添加
+    if "AppId" not in body:
+        body["AppId"] = APPID
     response = request_rtc_api("StopVoiceChat", body)
     return response
+
+
+def update_voice_chat(body: dict):
+    response = request_rtc_api("UpdateVoiceChat", body)
+    return response
+
+
+def update_voice_chat_by_uid(uid: str, task_id: str, message: str):
+    body = {
+        "AppId": APPID,
+        "RoomId": uid,
+        "TaskId": task_id,
+        "Command": "ExternalTextToSpeech",
+        "Message": message,
+        "InterruptMode": 1,
+    }
+    return update_voice_chat(body)
 
 
 if __name__ == "__main__":

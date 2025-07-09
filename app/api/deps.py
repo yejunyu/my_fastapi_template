@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud, models, schemas
 from app.core import security
+from app.core.exceptions import BusinessException, BusinessErrorCode
 from app.core.config import settings
 from app.db.session import AsyncSessionFactory
 
@@ -78,3 +79,20 @@ async def get_current_superuser(
             status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+
+def require_points(required_points: int):
+    """工厂函数，创建需要特定积分的依赖项"""
+
+    async def check_user_points(
+        current_user: models.User = Depends(get_current_user),
+    ) -> models.User:
+        user_points = getattr(current_user, "points", 0)
+        if user_points < required_points:
+            raise BusinessException(
+                error_enum=BusinessErrorCode.POINTS_NOT_ENOUGH,
+                msg=f"积分不足，需要{required_points}积分，当前仅有{user_points}积分",
+            )
+        return current_user
+
+    return check_user_points

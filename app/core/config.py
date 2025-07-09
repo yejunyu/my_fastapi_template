@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     # Redis 配置
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str = ""
 
     # JWT 配置
     SECRET_KEY: str = ""  # 用于签名 JWT 的密钥，必须保密

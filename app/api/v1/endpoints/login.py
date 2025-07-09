@@ -72,6 +72,49 @@ async def send_verification_code(
     return schemas.Msg(msg="验证码已发送至您的邮箱，请注意查收")
 
 
+@router.post("/send-login-code")
+async def send_login_verification_code(
+    *,
+    db_session: AsyncSession = Depends(deps.get_db),
+    email_data: schemas.SendVerificationCode,
+) -> schemas.Msg:
+    """
+    发送登录用的邮箱验证码
+    """
+    # 频率限制检查
+    if not check_rate_limit(f"login-code:{email_data.email}", 60):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="请求过于频繁，请60秒后再试",
+        )
+
+    # 检查邮箱是否已注册
+    existing_user = await crud.user.get_by_email(db_session, email=email_data.email)
+    if not existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该邮箱未注册，请先注册",
+        )
+
+    # 生成验证码
+    code = email_service.generate_verification_code()
+
+    # 保存验证码到数据库
+    await crud.email_verification.create_code(
+        db_session, email=email_data.email, code=code
+    )
+
+    # 发送邮件
+    success = await email_service.send_verification_code(email_data.email, code)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="发送验证码失败，请稍后重试",
+        )
+
+    return schemas.Msg(msg="登录验证码已发送至您的邮箱，请注意查收")
+
+
 @router.post("/register", response_model=schemas.UserPublic)
 async def register_new_user(
     *,
@@ -220,7 +263,7 @@ async def reset_password(
         )
 
     # 获取用户
-    user = await crud.user.get(db_session, id=token_obj.user_id)
+    user = await crud.user.get(db_session, id=getattr(token_obj, "user_id"))
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
 
