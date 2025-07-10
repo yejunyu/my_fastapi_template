@@ -1,30 +1,44 @@
-# 1. 使用官方的 Python 3.13 slim 版本作为基础镜像
-FROM python:3.13-slim
+# --- Build Stage ---
+FROM python:3.13-slim AS builder
 
-# 2. 设置环境变量
-#    - PYTHONDONTWRITEBYTECODE: 防止 Python 写入 .pyc 文件
-#    - PYTHONUNBUFFERED: 确保容器日志直接输出，不被缓冲
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# 3. 设置工作目录
 WORKDIR /app
 
-# 4. 更新包管理器并安装系统依赖 (如果需要)
-# RUN apt-get update && apt-get install -y --no-install-recommends gcc
+# 安装构建依赖，例如gcc (如果您的Python包需要编译)
+# 如果您发现某些包（如psycopg-binary, cryptography, lxml等）需要C编译器，请取消注释下一行
+# RUN apt-get update && apt-get install -y --no-install-recommends gcc build-essential
 
-# 5. 安装 Python 依赖
-#    首先复制 requirements.txt，以便利用 Docker 的层缓存机制
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 安装 uv
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple uv
 
-# 6. 复制应用代码到工作目录
+COPY requirements.txt ./
+
+# 用 uv 安装依赖到虚拟环境或指定目录
+# 使用 --target 参数将包安装到特定目录，而不是系统site-packages
+RUN uv pip install --prefix /install --system -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# --- Runtime Stage ---
+FROM python:3.13-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+
+# 从构建阶段复制安装好的依赖
+COPY --from=builder /install /usr/local
+# 或者 COPY --from=builder /install /app/venv # 如果安装到虚拟环境
+
+# 复制应用代码
 COPY . .
 
-# 7. 暴露应用运行的端口
+# 复制并设置启动脚本权限
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 EXPOSE 8000
 
-# 8. 定义容器启动时运行的命令
-#    使用 uvicorn 启动 FastAPI 应用
-#    --host 0.0.0.0 使其可以从容器外部访问
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0", "--port", "8000"]

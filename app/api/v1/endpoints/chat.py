@@ -31,7 +31,7 @@ from openai import AsyncOpenAI
 from app.core.response import UnifiedResponseRoute
 from app.services.zijie import rtc_callback, sig
 from app.utils.prompt_loader import prompt_loader
-from app.schemas.chat import ChatLogCreate, ChatLogUpdate
+from app.schemas.chat import ChatLogCreate, ChatLogOut, ChatLogUpdate
 from app.schemas.interview import InterviewOut
 from app.core.exceptions import BusinessException, BusinessErrorCode
 
@@ -168,7 +168,7 @@ async def list_interview_result(
     current_user: models.User = Depends(deps.get_current_user),
 ):
     """
-    获得面试结果
+    获得面试结果列表
     """
     user_id = getattr(current_user, "id", None)
     if user_id is None:
@@ -196,6 +196,42 @@ async def assemble_chat_logs(db: AsyncSession, task_id: str) -> list:
     return result
 
 
+@router.get("/list/chatlog/{task_id}", response_model=list[ChatLogOut])
+async def chat_logs(
+    *,
+    db_session: AsyncSession = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+    task_id: str,
+):
+    """
+    获取聊天记录
+    """
+    chat_logs = await crud_chat_log.get_chat_logs_by_taskid(db_session, task_id)
+
+    return [ChatLogOut.model_validate(log, from_attributes=True) for log in chat_logs]
+
+
+@router.get("/detail/resume/{task_id}", response_model=dict)
+async def detail_resume(
+    *,
+    db_session: AsyncSession = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+    task_id: str,
+):
+    """
+    获取简历分析信息
+    """
+    """
+    获取简历分析 resume_analysis 字段
+    """
+    uid = getattr(current_user, "id", 0)
+    interview = await crud_interview.get_by_task_id(db_session, task_id, uid)
+    if not interview or not interview.interview_result:
+        raise HTTPException(status_code=404, detail="未找到面试或分析结果")
+    resume_analysis = interview.interview_result.get("resume_analysis")
+    return {"resume_analysis": resume_analysis}
+
+
 @router.get("/detail/interview_result/{task_id}", response_model=InterviewOut)
 async def detail_interview_result(
     *,
@@ -212,7 +248,10 @@ async def detail_interview_result(
         raise BusinessException(
             error_enum=BusinessErrorCode.INTERVIEW_NOT_FOUND, msg="面试结果不存在"
         )
-    if getattr(interview, "status", None) != InterviewStatus.INTERVIEW_COMPLETED.value:
+    if getattr(interview, "status", None) not in [
+        InterviewStatus.INTERVIEW_COMPLETED.value,
+        InterviewStatus.INTERVIEW_ANALYSIS_COMPLETED.value,
+    ]:
         raise BusinessException(
             error_enum=BusinessErrorCode.INTERVIEW_NOT_COMPLETED, msg="面试结果未完成"
         )

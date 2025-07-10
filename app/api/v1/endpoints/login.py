@@ -36,7 +36,7 @@ async def send_verification_code(
     email_data: schemas.SendVerificationCode,
 ) -> schemas.Msg:
     """
-    发送邮箱验证码
+    发送邮箱注册验证码
     """
     # 频率限制检查
     if not check_rate_limit(f"email:{email_data.email}", 60):

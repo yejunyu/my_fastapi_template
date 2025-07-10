@@ -34,8 +34,6 @@ class ChatLogUpdate(BaseModel):
 
 
 class ChatLogOut(BaseModel):
-    id: int
-    user_id: str
     task_id: str
     message: str
     is_ai: bool

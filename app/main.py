@@ -5,6 +5,7 @@ from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from loguru import logger
 from sqlalchemy import false, select
+from app.core.config import settings
 from app.db.session import AsyncSessionFactory  # 你的 async_session 工厂
 
 from app.core.response import UnifiedResponseRoute
@@ -50,6 +51,9 @@ async def scan_interview_table():
     2. 对活跃的面试进行计费（扣除积分）。
     3. 积分不足或心跳超时则终止面试。
     """
+    # 打印数据库连接信息
+    logger.info(f"数据库连接信息: {settings.SQLALCHEMY_DATABASE_URI}")
+
     while True:
         try:
             async with AsyncSessionFactory() as session:

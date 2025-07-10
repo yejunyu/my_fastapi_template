@@ -9,11 +9,11 @@ class Settings(BaseSettings):
     PROJECT_VERSION: str = "1.0.0"
 
     # PostgreSQL 数据库配置
-    POSTGRES_USER: str = "root"
-    POSTGRES_PASSWORD: str = "123456"
-    POSTGRES_SERVER: str = "localhost"
+    POSTGRES_USER: str = ""
+    POSTGRES_PASSWORD: str = ""
+    POSTGRES_SERVER: str = ""
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "fastapi"
+    POSTGRES_DB: str = "interview"
 
     # 构造数据库 URL
     @property
@@ -50,11 +50,15 @@ class Settings(BaseSettings):
     ALIPAY_NOTIFY_URL: str = ""
     ALIPAY_SERVER_URL: str = "https://openapi.alipay.com/gateway.do"
 
+    # 语音回调
+    VOICE_CALLBACK_URL: str = ""
+
     class Config:
         # 指定 .env 文件的路径
-        env_file = ".env"
+        env_file = ".env.prod"
         # 指定 .env 文件的编码
         env_file_encoding = "utf-8"
 
 
+print("dbu", Settings().SQLALCHEMY_DATABASE_URI)
 settings = Settings()

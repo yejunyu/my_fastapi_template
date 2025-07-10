@@ -6,6 +6,7 @@ import pathlib
 import time
 import aiofiles
 from fastapi import APIRouter, Depends
+from app.core.config import settings
 from app.core.response import UnifiedResponseRoute
 from app.core.exceptions import BusinessException
 
@@ -107,7 +108,7 @@ async def get_scene_config(
             "SubtitleConfig": {
                 "DisableRTSSubtitle": False,
                 "SubtitleMode": 1,
-                "ServerMessageUrl": "http://x795626b.natappfree.cc/api/v1/chat/chat_callback",
+                "ServerMessageUrl": settings.VOICE_CALLBACK_URL,
                 "ServerMessageSignature": f"{uid}+{task_id}",
             },
             "LLMConfig": {
