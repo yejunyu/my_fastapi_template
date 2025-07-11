@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -8,7 +8,7 @@ class OrderPublic(BaseModel):
     user_id: int
     order_no: str
     product_id: str
-    status: int
+    status: int = Field(description="0未支付；1支付；2交易完成")
     amount: int
     created_at: datetime
     updated_at: datetime

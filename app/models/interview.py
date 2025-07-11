@@ -1,5 +1,5 @@
 from enum import IntEnum
-from sqlalchemy import JSON, Column, DateTime, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
 
 from .base import BaseModel
 
@@ -38,6 +38,7 @@ class Interview(BaseModel):
     end_time = Column(DateTime(timezone=True), nullable=True, comment="面试结束时间")
     extra = Column(Text, default="", comment="额外信息")
     duration = Column(Integer, default=0, comment="面试时长，单位秒")
+    delete_flag = Column(Boolean, default=False)
 
 
 class Order(BaseModel):

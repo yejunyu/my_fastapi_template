@@ -79,7 +79,7 @@ async def get_scene_config(
         "TaskId": task_id,
         "AgentConfig": {
             "TargetUserId": [uid],
-            "WelcomeMessage": "你好，我是你今天的面试官刘聪, 要不你先做个简单的自我介绍吧？",
+            "WelcomeMessage": "你好，我是你今天的面试官, 要不你先做个简单的自我介绍吧？",
             "UserId": "ai" + uid,
             "EnableConversationStateCallback": True,
         },

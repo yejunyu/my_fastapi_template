@@ -44,6 +44,7 @@ class CRUDInterview(CRUDBase[Interview, InterviewCreate, InterviewUpdate]):
             .filter(
                 Interview.user_id == uid,
                 Interview.status != InterviewStatus.START_INTERVIEW,
+                Interview.delete_flag == False,
             )
             .order_by(Interview.updated_at.desc())
         )
@@ -60,6 +61,15 @@ class CRUDInterview(CRUDBase[Interview, InterviewCreate, InterviewUpdate]):
         )
         return result.scalars().all()
 
+    async def update_notification_status(
+        self, db: AsyncSession, interview: Interview, status: int
+    ) -> int:
+        setattr(interview, "notification_status", status)
+        db.add(interview)
+        await db.commit()
+        await db.refresh(interview)
+        return 1
+
     async def update_updated_at_by_uid_taskid(
         self, db: AsyncSession, user_id: int, task_id: str
     ) -> int:
@@ -73,6 +83,27 @@ class CRUDInterview(CRUDBase[Interview, InterviewCreate, InterviewUpdate]):
             from datetime import datetime, timezone
 
             setattr(interview, "updated_at", datetime.now(timezone.utc))
+            setattr(interview, "notification_status", 0)
+            db.add(interview)
+            await db.commit()
+            await db.refresh(interview)
+            return 1
+        return 0
+
+    async def delete_interview_log(
+        self, db: AsyncSession, uid: int, task_id: str
+    ) -> int:
+        """
+        逻辑删除：将指定用户和任务的面试记录的 delete_flag 置为 True
+        """
+        result = await db.execute(
+            select(Interview).where(
+                Interview.user_id == uid, Interview.task_id == task_id
+            )
+        )
+        interview = result.scalars().first()
+        if interview:
+            setattr(interview, "delete_flag", True)
             db.add(interview)
             await db.commit()
             await db.refresh(interview)

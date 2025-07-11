@@ -29,7 +29,7 @@ logger.add(
     level="INFO",
 )
 
-HEARTBEAT_TIMEOUT = 60  # 心跳超时时间（秒）
+HEARTBEAT_TIMEOUT = 30  # 心跳超时时间（秒）
 
 
 @asynccontextmanager
@@ -116,7 +116,7 @@ async def scan_interview_table():
 
                     # 状态0: 从未警告 -> 检查20秒超时
                     if notification_status == 0 and time_delta > timedelta(
-                        seconds=HEARTBEAT_TIMEOUT / 2
+                        seconds=HEARTBEAT_TIMEOUT
                     ):
                         logger.warning(
                             f"面试 {interview.task_id} 20s未响应，发送警告。"
@@ -127,13 +127,13 @@ async def scan_interview_table():
                             "请在20s内继续作答哦，否则系统将会自动终止本次面试！",
                         )
                         # 更新状态到1
-                        await crud_interview.update(
-                            session, db_obj=interview, obj_in={"notification_status": 1}
+                        await crud_interview.update_notification_status(
+                            session, interview, 1
                         )
 
                     # 状态1: 已发送20秒警告 -> 检查40秒超时
                     elif notification_status == 1 and time_delta > timedelta(
-                        seconds=HEARTBEAT_TIMEOUT
+                        seconds=HEARTBEAT_TIMEOUT + 3
                     ):
                         logger.warning(
                             f"面试 {interview.task_id} 心跳超时40s，发送最终警告。"
@@ -144,8 +144,8 @@ async def scan_interview_table():
                             "未在规定时间内作答，本次面试到此结束，请在本页面耐心等待查收面试分析结果！",
                         )
                         # 更新状态到2
-                        await crud_interview.update(
-                            session, db_obj=interview, obj_in={"notification_status": 2}
+                        await crud_interview.update_notification_status(
+                            session, interview, 2
                         )
 
                     # 状态2: 已发送最终警告 -> 检查45秒超时并终止

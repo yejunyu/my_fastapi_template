@@ -55,7 +55,7 @@ class Settings(BaseSettings):
 
     class Config:
         # 指定 .env 文件的路径
-        env_file = ".env.prod"
+        env_file = ".env"
         # 指定 .env 文件的编码
         env_file_encoding = "utf-8"
 

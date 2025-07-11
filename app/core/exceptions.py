@@ -42,7 +42,11 @@ def setup_exception_handlers(app: FastAPI) -> None:
         """处理所有其他未捕获的异常"""
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"code": 500, "msg": f"Internal Server Error: {exc}", "data": None},
+            content={
+                "code": 500,
+                "msg": f"Internal Server Error: 系统异常",
+                "data": None,
+            },
         )
 
 
@@ -60,7 +64,6 @@ class BusinessErrorCode(Enum):
     CHAT_ERROR = (2004, "chat error")
     # 订单相关
     ORDER_ERROR = (3003, "order error")
-    # 可扩展更多业务错误码
 
     def __init__(self, code, msg):
         self._code = code

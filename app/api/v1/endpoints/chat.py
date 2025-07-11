@@ -182,6 +182,18 @@ async def list_interview_result(
     ]
 
 
+@router.delete("/interview_result/{task_id}")
+async def delete_interview_result(
+    *,
+    db_session: AsyncSession = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+    task_id: str,
+):
+    uid = getattr(current_user, "id", 0)
+    result = await crud_interview.delete_interview_log(db_session, uid, task_id)
+    return result
+
+
 async def assemble_chat_logs(db: AsyncSession, task_id: str) -> list:
     chat_logs = await crud_chat_log.get_chat_logs_by_taskid(db, task_id)
     result = []

@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import models
 from app.api import deps
 from app.models.interview import OrderStatus
+from app.models.user import User, UserStatus
 from app.schemas.product import ProductPublic, PaymentInput
 from app.schemas.order import OrderPublic
 from loguru import logger
@@ -29,7 +30,9 @@ async def list_props(
     获取商品的列表
     """
     result = await db_session.execute(
-        Select(models.Product).where(models.Product.status == 1)
+        Select(models.Product)
+        .where(models.Product.status == 1)
+        .order_by(models.Product.id.asc())
     )
     products = result.scalars().all()
     return [ProductPublic.model_validate(product) for product in products]
@@ -114,12 +117,13 @@ async def payment_ali_notify(
         if form_data.get("trade_status") == "TRADE_SUCCESS":
             order = await db_session.execute(
                 Select(models.Order).where(
-                    models.Order.order_no == form_data.get("out_trade_no")
+                    models.Order.order_no == form_data.get("out_trade_no"),
+                    models.Order.status == OrderStatus.UNPAID,
                 )
             )
             order = order.scalar_one_or_none()
             if not order:
-                logger.error(f"订单不存在: {form_data.get('out_trade_no')}")
+                logger.error(f"订单不存在或已支付: {form_data.get('out_trade_no')}")
                 return {"code": 0, "msg": "success"}
             order.status = OrderStatus.PAID
             db_session.add(order)
@@ -145,6 +149,7 @@ async def payment_ali_notify(
                     status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在"
                 )
             user.points += product.duration_seconds
+            user.status = UserStatus.PAID.value
             db_session.add(user)
             await db_session.commit()
             await db_session.refresh(user)
